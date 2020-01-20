@@ -44,7 +44,8 @@
 ;;Flat-list item render function
 (defn render-item [item index separators]
   [view {:style {:flex-direction "column"}}
-   [text (str (:name item) ": " (:message item))]
+   [text (str (:name item) ": ") ]
+   [text (:message item)]
    [text " "]]
   )
 
@@ -59,9 +60,9 @@
        ;                :height 200}}]
        ;[text {:style {:font-size 30 :font-weight "100" :margin-bottom 20 :text-align "center"}} @greeting]
        ;[ic {:name "ios-arrow-down" :size 60 :color "green"}]
-       [view {:style {:flex-direction "row"}}
-        [text "My name is"]
-        [text-input {:style {:borderColor "gray" :borderWidth 1 :width 100 :padding 10}
+       [view {:style {:flex-direction "row"  :justify-content "space-between",}}
+        [text {:style { :padding 10}} "I am:"]
+        [text-input { :style {:borderColor "gray" :borderWidth 1 :width 200}
                      :onChangeText  #(reset! my-name %)
                      :value @my-name}]
 
