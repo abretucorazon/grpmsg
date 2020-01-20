@@ -6,6 +6,7 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/clojurescript "1.10.520"]
                  [binaryage/oops "0.7.0"]
+                 [org.clojars.samedhi/firemore "0.3.0"]
                  [reagent "0.8.1" :exclusions [cljsjs/react cljsjs/react-dom cljsjs/react-dom-server cljsjs/create-react-class]]
                  [re-frame "0.10.8"]]
   :plugins [[lein-cljsbuild "1.1.4"]

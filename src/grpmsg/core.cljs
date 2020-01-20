@@ -1,9 +1,33 @@
 (ns grpmsg.core
-    (:require [reagent.core :as r :refer [atom]]
-              [re-frame.core :refer [subscribe dispatch dispatch-sync]]
-              [oops.core :refer [ocall]]
-              [grpmsg.handlers]
-              [grpmsg.subs]))
+  (:require [reagent.core :as r :refer [atom]]
+            [re-frame.core :refer [subscribe dispatch dispatch-sync]]
+            [oops.core :refer [ocall]]
+           ;; [cljs.core.async :as async]
+           ;; [firemore.core :as firemore]
+            [grpmsg.handlers]
+            [grpmsg.subs])
+  ;;(:require-macros
+  ;; [cljs.core.async.macros :refer [go-loop go]])
+)
+
+; Import Firebase SDK
+(defonce firebase  (js/require "firebase/app"))
+(js/require "firebase/firestore")
+
+; Firebase configuration for this app
+(defonce firebaseConfig #js {
+    :apiKey "AIzaSyCTl1UP8wxK7rSMvR8Kx8NhysmLcXDoewY",
+    :authDomain "groupmessage-2c107.firebaseapp.com",
+    :databaseURL "https://groupmessage-2c107.firebaseio.com",
+    :projectId "groupmessage-2c107",
+    :storageBucket "groupmessage-2c107.appspot.com",
+    :messagingSenderId "158692618500",
+    :appId "1:158692618500:web:aea01ac266f59c7d9d2051"
+  })
+
+; Initialize Firebase
+(defonce not-used (.initializeApp firebase firebaseConfig))
+(defonce firestore (.dbStore firebase))
 
 (def ReactNative (js/require "react-native"))
 (def expo (js/require "expo"))
@@ -55,14 +79,9 @@
         message (r/atom "")]
     (fn []
       [view {:style {:flex-direction "column" :margin 20 :align-items "stretch" }}
-       ;[image {:source (js/require "./assets/images/cljs.png")
-       ;        :style {:width 200
-       ;                :height 200}}]
-       ;[text {:style {:font-size 30 :font-weight "100" :margin-bottom 20 :text-align "center"}} @greeting]
-       ;[ic {:name "ios-arrow-down" :size 60 :color "green"}]
-       [view {:style {:flex-direction "row"  :justify-content "space-between",}}
-        [text {:style { :padding 10}} "I am:"]
-        [text-input { :style {:borderColor "gray" :borderWidth 1 :width 200}
+       [view {:style {:flex-direction "row"  :justify-content "space-between"}}
+        [text {:style {:padding 10}} "I am:"]
+        [text-input {:style {:borderColor "gray" :borderWidth 1 :width 200}
                      :onChangeText  #(reset! my-name %)
                      :value @my-name}]
 
