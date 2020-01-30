@@ -12,13 +12,11 @@
 )
 
 ; Import Firebase SDK
-(defonce firebase  (js/require "firebase/app"))
-(js/require "@firebase/firestore")
-
-
 ; Initialize Firebase
-(defonce not-used (.initializeApp firebase firebase-config))
-(defonce firestore (.dbStore firebase))
+(defonce firebase  (js/require "firebase/app"))
+(defonce _ (.initializeApp firebase firebase-config))
+(defonce _ (js/require "firebase/firestore"))
+(defonce db (.firestore firebase))
 
 (def ReactNative (js/require "react-native"))
 (def expo (js/require "expo"))
