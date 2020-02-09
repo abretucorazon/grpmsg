@@ -8,5 +8,7 @@
 ;;  (s/keys :req-un [::greeting]))
 
 ;; initial state of app-db
-(def app-db {:greeting "Hello WORLD Clojurescript in Expo!"
-             :messages [{:user "Greeting" :text "Welcome to ClojureScript Chat App"}] })
+(def app-db {:greeting "grpmsg"
+             :messages [{:user "Greeting" :text "Welcome to ClojureScript Chat App"}
+                        {:user "John" :text "Hello Mike" }
+                        {:user "Mike" :text "Hi John" }] })

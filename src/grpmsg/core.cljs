@@ -7,8 +7,6 @@
             [grpmsg.firebase-config :refer [firebase-config]]
             [grpmsg.handlers]
             [grpmsg.subs])
-  ;;(:require-macros
-  ;; [cljs.core.async.macros :refer [go-loop go]])
 )
 
 ; Import Firebase SDK
@@ -57,17 +55,16 @@
 ;;Flat-list item render function
 (defn render-item [item index separators]
   [view {:style {:flex-direction "column"}}
-   [text (str (:name item) ": ") ]
-   [text (:message item)]
+   [text (str (:user item) ": " (:text item)) ]
    [text " "]]
   )
 
 (defn app-root []
   (let [chat (subscribe [:get-messages])
-        my-name (r/atom "")
+        my-name (r/atom @(subscribe [:get-greeting] ))
         message (r/atom "")]
     (fn []
-      [view {:style {:flex-direction "column" :margin 20 :align-items "stretch" }}
+      [view {:style {:flex-direction "column" :margin 20 :align-items "stretch"}}
        [view {:style {:flex-direction "row"  :justify-content "space-between"}}
         [text {:style {:padding 10}} "I am:"]
         [text-input {:style {:borderColor "gray" :borderWidth 1 :width 200}
@@ -75,24 +72,23 @@
                      :value @my-name}]
 
         [touchable-highlight {:style {:background-color "#999" :padding 10 :border-radius 5}
-                              :on-press #(alert (str "Connect as  " @my-name))}
-         [text {:style {:color "white" :text-align "center" :font-weight "bold"}} "connect"]]]
+                              :on-press #(dispatch [:set-greeting @my-name])}
+        [text {:style {:color "white" :text-align "center" :font-weight "bold"}} "connect"]]]
 
        [flat-list {:style {:borderColor "gray" :borderWidth 1 :padding 10 :height 500}
-                   :data (wrap-data [{:name "John" :message "Hello Mike" :id "id1"}
-                                     {:name "Mike" :message "Hi John" :id "ida"}])
-                   :key-extractor (fn [item index] (str index)) ;;(get-in item [:message :id])))
+                   :data (wrap-data @chat)
+                   :keyExtractor (fn [data index] (str index));;(.-item data))
                    :renderItem (fn [data]
                                  (r/as-element (render-item (.-item data) (.-index data) (.-separators data))))}]
-
-
-       [view {:style { :flex-direction "row"}}
+                   
+       [view {:style {:flex-direction "row"}}
         [text-input {:style {:borderColor "gray" :borderWidth 1 :width 300 :padding 10}
                      :onChangeText  #(reset! message %)
-                     :onSubmitEditing #(alert @message)
                      :value @message}]
         [touchable-highlight {:style {:background-color "#999" :padding 10 :border-radius 5}
-                              :on-press #(alert (str "Send: " @message))}
+                              :on-press (fn []
+                                          (dispatch [:add-message @message])
+                                          (reset! message ""))}
          [text {:style {:color "white" :text-align "center" :font-weight "bold"}} "send"]]]])))
 
 

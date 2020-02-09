@@ -44,3 +44,10 @@
  ;;[validate-spec]
  (fn [db [_ value]]
    (assoc db :messages value)))
+
+;; Add a new message to the end of :messages
+(reg-event-db
+ :add-message
+ ;;[validate-spec]
+ (fn [db [_ msg]]
+   (assoc db :messages (conj (db :messages) {:user (db :greeting) :text msg} ))))
