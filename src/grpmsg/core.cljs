@@ -2,19 +2,11 @@
   (:require [reagent.core :as r :refer [atom]]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [oops.core :refer [ocall]]
-           ;; [cljs.core.async :as async]
-           ;; [firemore.core :as firemore]
             [grpmsg.firebase-config :refer [firebase-config]]
             [grpmsg.handlers]
             [grpmsg.subs])
 )
 
-; Import Firebase SDK
-; Initialize Firebase
-(defonce firebase  (js/require "firebase/app"))
-(defonce _ (.initializeApp firebase firebase-config))
-(defonce _ (js/require "firebase/firestore"))
-(defonce db (.firestore firebase))
 
 (def ReactNative (js/require "react-native"))
 (def expo (js/require "expo"))
@@ -87,7 +79,7 @@
                      :value @message}]
         [touchable-highlight {:style {:background-color "#999" :padding 10 :border-radius 5}
                               :on-press (fn []
-                                          (dispatch [:add-message @message])
+                                          (dispatch [:send-message @message])
                                           (reset! message ""))}
          [text {:style {:color "white" :text-align "center" :font-weight "bold"}} "send"]]]])))
 

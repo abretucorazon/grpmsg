@@ -1,8 +1,46 @@
 (ns grpmsg.handlers
   (:require
-    [re-frame.core :refer [reg-event-db ->interceptor]]
-    [clojure.spec.alpha :as s]
-    [grpmsg.db :as db :refer [app-db]]))
+   [re-frame.core :refer [reg-event-db ->interceptor dispatch dispatch-sync]]
+   [clojure.spec.alpha :as s]
+   [grpmsg.db :as db :refer [app-db]]
+   [grpmsg.firebase-config :refer [firebase-config]]))
+
+;; -- Firebase ----------------------------------------------------------
+; Import Firebase SDK
+; Initialize Firebase
+(defonce fb  (js/require "firebase/app"))
+(defonce not-used1 (.initializeApp fb firebase-config))
+(defonce not-used2 (js/require "firebase/firestore"))
+(defonce db (.firestore fb))
+(defonce fb-col-name "messages")
+(defonce fb-colref (.collection db fb-col-name))
+
+;; Firebase listener callback
+(defn fb-listener [snapshot]
+    (print "Firebase snapshot - # of changes is " (-> (.docChanges snapshot) (js->clj :keywordize-keys true) (count)))
+    (let [changes  (-> snapshot (.docChanges) (js->clj :keywordize-keys true))
+          recv-msgs (map (fn [x] (-> x (:doc) (.data) (js->clj :keywordize-keys true))) changes)
+          ]
+      (doseq [x recv-msgs]
+        (dispatch [:receive-message x])
+        )))
+
+
+;; Setup listener for firebase updates
+(def fb-unsubscribe (.onSnapshot fb-colref 
+                                 fb-listener
+                                 (fn [error] (print "Firebase listener error: " error))))
+
+
+;; Add new text message to firebase document
+(defn fb-add-msg [user msg]
+  (-> fb-colref
+      (.add #js{:username user :text msg :time (fb.firestore.Timestamp.now)})
+      (.then (fn[s] (print "Message added to firebase!" )))
+      (.catch (fn [error] (print "Error adding message: " error))))
+      )
+
+
 
 ;; -- Interceptors ----------------------------------------------------------
 ;;
@@ -45,9 +83,22 @@
  (fn [db [_ value]]
    (assoc db :messages value)))
 
-;; Add a new message to the end of :messages
+
+;; Also add new message to Firebase
 (reg-event-db
- :add-message
+ :send-message
  ;;[validate-spec]
  (fn [db [_ msg]]
-   (assoc db :messages (conj (db :messages) {:user (db :greeting) :text msg} ))))
+   (let [username (db :greeting)]
+     (fb-add-msg username msg)
+     db 
+     )))
+
+
+;; Receive a new message from firebase - add it to the end of :messages in local db
+(reg-event-db
+ :receive-message
+ ;;[validate-spec]
+ (fn [db [_ {:keys [username text] :as msg}]]
+   (print ":receive-message " msg)
+   (assoc db :messages (conj (db :messages) {:user username :text text}))))
